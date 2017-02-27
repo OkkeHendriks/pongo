@@ -1,17 +1,40 @@
 #pragma once
 
+#include <memory>
 #include <list>
 
-#include "IComponent.h"
+
+#include "pongo/CEventClient.h"
+#include "IPhysical.h"
 
 class CObject
 {
 public:
-	CObject(std::list<IComponent> components);
-	~CObject();
+	CObject::CObject(std::shared_ptr<IPhysical> physical)
+	{
+		mPhysical = physical;
+		mRenderClient = CEventClient::create();
+	}
 
-	void update(float dT);
+	CObject::~CObject()
+	{
+	}
+
+	void CObject::update(float dT)
+	{
+		// Get current vertex postions
+		sf::VertexArray vertices = mPhysical->Draw();
+
+		// Update physics
+
+		// Get 
+
+		mRenderClient->post<CDrawEvent>(CDrawEvent(vertices));
+	}
+
 
 private:
-	std::list<IComponent> mComponents;
+	std::shared_ptr<IPhysical> mPhysical;
+	std::shared_ptr<CEventClient> mRenderClient;
+
 };

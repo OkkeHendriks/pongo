@@ -1,59 +1,44 @@
 #pragma once
-#include <memory>
-#include "CEventPool.h"
-#include "IEvent.h"
+#include <queue>
 
+#include "CEventPool.h"
 
 class CEventClient : public std::enable_shared_from_this<CEventClient>
 {
+private:
+	CEventClient() = default;
+	CEventClient(const CEventClient& o) = default;
 public:
-	CEventClient(std::shared_ptr<CEventPool> eventPool)
-		: mEventPool(eventPool)
-	{
-		
-	}
+	~CEventClient() = default;
 
-	~CEventClient()
-	{
-	}
-
-	template <class T>
-	void send(T anEvent)
-	{
-		mEventPool->publish(anEvent);
+	template<typename ... T>
+	static std::shared_ptr<CEventClient> create(T&& ... args) {
+		return std::shared_ptr<CEventClient>(new CEventClient(std::forward<T>(args)...));
 	}
 
 	template <class T>
 	void subscribe()
 	{
-		std::list<T> eventList;
-		mEventPool->subscribe<T>(shared_from_this());
+		pool<T>()->subscribe(shared_from_this());
 	}
 
 	template <class T>
-	void addEvent(T anEvent)
+	void post(T event, bool postToSelf = false)
 	{
-		mEvents.push_back(anEvent);
+		pool<T>()->post(shared_from_this(), event, postToSelf);
 	}
 
 	template <class T>
-	std::list<T> getEvents()
+	std::queue<T> getMail()
 	{
-		std::list<T> events;
-		auto typeIndex = std::type_index(typeid(T));		
-
-		if (mEvents.find(typeIndex) == mEvents.end())
-			return events;
-
-		for (auto event : mEvents[typeIndex])
-		{
-			events.push_back(event);
-			// Use queue and pop
-		}
-		return events;
+		return pool<T>()->getMail(shared_from_this());
 	}
 
 private:
-	std::shared_ptr<CEventPool> mEventPool;
-	std::map<std::type_index, > mEvents;
+	template <class T>
+	static std::shared_ptr<CEventPool<T>>& pool()
+	{
+		static std::shared_ptr<CEventPool<T>> pool = std::make_shared<CEventPool<T>>();
+		return pool;
+	}
 };

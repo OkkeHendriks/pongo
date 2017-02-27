@@ -1,49 +1,56 @@
 #pragma once
 #include <map>
-#include <typeindex>
 #include <memory>
-#include <list>
+#include <queue>
 
 class CEventClient;
 
+template <class T>
 class CEventPool
 {
 public:
-	CEventPool();
-	~CEventPool();
-
-	template <class T>
-	void publish(T anEvent)
+	CEventPool()
 	{
-		auto typeIndex = std::type_index(typeid(T));
-		if (events.find(typeIndex) != events.end())
-		{
-			for (auto& subscriber : events[typeIndex])
-			{
-				subscriber.addEvent(anEvent);
-			}
-		}
+	}
+	~CEventPool()
+	{
 	}
 
-	template <class T>
 	void subscribe(std::shared_ptr<CEventClient> client)
 	{
-		auto typeIndex = std::type_index(typeid(T));
-		if (events.find(typeIndex) == events.end())
+		if (mMailBoxes.find(client) == mMailBoxes.end())
 		{
-			events[typeIndex] = std::list<std::shared_ptr<CEventClient>>();
+			mMailBoxes[client] = std::queue<T>();
 		}
-		events[typeIndex].push_back(client);
 	}
 
+	void post(std::shared_ptr<CEventClient> sender, T event, bool postToSelf)
+	{
+		for (auto& mailBox : mMailBoxes)
+		{
+			if (postToSelf || mailBox.first != sender)
+				mailBox.second.push(event);
+		}
+	}
+
+	std::queue<T> getMail(std::shared_ptr<CEventClient> client)
+	{
+		auto mailBox = mMailBoxes.find(client);
+		if (mailBox != mMailBoxes.end())
+		{
+			std::queue<T> cpy = mailBox->second;
+			while (!mailBox->second.empty())
+			{
+				mailBox->second.pop();
+			}
+			return cpy;
+		}
+			
+
+		return std::queue<T>();
+	}
+
+
 private:
-	std::map<std::type_index, std::list<std::shared_ptr<CEventClient>>> events;
+	std::map<std::shared_ptr<CEventClient>, std::queue<T>> mMailBoxes;
 };
-
-CEventPool::CEventPool()
-{
-}
-
-CEventPool::~CEventPool()
-{
-}

@@ -1,42 +1,28 @@
 #include <memory>
+#include <list>
 #include <iostream>
 
 #include "SFML\Graphics.hpp"
-#include "pongo\CEventClient.h"
-#include "pongo\CDrawEvent.h"
 
+#include "pongo\CObject.h"
+#include "pongo\CBall.h"
+#include "pongo\CRenderer.h"
 
 int main(int argc, char* argv[])
 {
-	sf::RenderWindow window(sf::VideoMode(700, 600), "Pongo!");
-	sf::CircleShape shape(100.f);
-	shape.setFillColor(sf::Color::Green);
-	CEventPool eventPool;
-	auto eventClient1 = std::make_shared<CEventClient>(eventPool);
-	eventClient1->subscribe<CDrawEvent>();
-
-	auto eventClient2 = std::make_shared<CEventClient>(eventPool);
-	eventClient2->subscribe<CDrawEvent>();
-
-	eventClient1->send(CDrawEvent(1));
-	auto events = eventClient2->getEvents<CDrawEvent>();
-	for (auto& event : events)
+	CRenderer renderer;
+	std::list<CObject> objects;
+	
+	objects.push_back(CObject({ std::make_shared<CBall>() }));
+	while (renderer.isOpen())
 	{
-		std::cout << event.mI << std::endl;
-	}
-
-	while (window.isOpen())
-	{
-		sf::Event event;
-		while (window.pollEvent(event))
+		renderer.update();
+		for (auto& object : objects)
 		{
-			if (event.type == sf::Event::Closed)
-				window.close();
+			object.update(0.1f);
 		}
+		renderer.draw();
 
-		window.clear();
-		window.draw(shape);
-		window.display();
 	}
 
 	return 0;

@@ -1,28 +1,26 @@
 #pragma once
-#include "IEvent.h"
+#include <SFML/Graphics.hpp>
 
-class CDrawEvent : public IEvent<CDrawEvent>
+// TODO: make templated event
+class CDrawEvent
 {
 public:
-	CDrawEvent(int i);
-	~CDrawEvent();
-	int mI;
+	CDrawEvent(sf::VertexArray vertices)
+		: mVertices(vertices)
+	{		
+	}
+
+	~CDrawEvent()
+	{
+	}
+
+	sf::VertexArray Get()
+	{
+		return mVertices;
+	}
+
+
 private:
-
-	virtual CDrawEvent Get() override;
-
+	sf::VertexArray mVertices;
 };
 
-CDrawEvent::CDrawEvent(int i)
-{
-	mI = 0;
-}
-
-CDrawEvent::~CDrawEvent()
-{
-}
-
-CDrawEvent CDrawEvent::Get()
-{
-	return *this;
-}

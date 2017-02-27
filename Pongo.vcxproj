@@ -118,11 +118,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="source\CBall.cpp" />
-    <ClCompile Include="source\CObject.cpp" />
     <ClCompile Include="include\pongo\CObject.h" />
-    <ClCompile Include="include\pongo\IComponent.h" />
-    <ClCompile Include="include\pongo\IVisual.h" />
+    <ClCompile Include="include\pongo\IPhysical.h" />
     <ClCompile Include="source\main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -130,7 +127,7 @@
     <ClInclude Include="include\pongo\CDrawEvent.h" />
     <ClInclude Include="include\pongo\CEventClient.h" />
     <ClInclude Include="include\pongo\CEventPool.h" />
-    <ClInclude Include="include\pongo\IEvent.h" />
+    <ClInclude Include="include\pongo\CRenderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
